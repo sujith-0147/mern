@@ -1,8 +1,18 @@
 const express = require("express");
 const adminauth = require("./middlewares/auth"); // ✅ Corrected path
-
+const connectdB=require("./config/database");
 const app = express();
-
+connectdB()
+    .then(() => {
+        console.log("Database connected successfully");
+        app.listen(5000, () => {
+    console.log("hi woeldd");
+});
+    })
+    .catch((err) => {
+        console.log("Database connection failed");
+        console.error(err); // optional: log the error
+    });
 app.use("/admin", adminauth);
 
 app.get("/admin/getalldata", (req, res) => {
@@ -19,6 +29,4 @@ app.use("/",(err,req,res,next)=>{
 
 });
 
-app.listen(5000, () => {
-    console.log("hi woeldd");
-});
+
