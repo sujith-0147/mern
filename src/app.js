@@ -4,5 +4,5 @@ app.use("/",(req,res)=>{
     res.send("hello world");
 });
 app.listen(5000,()=>{
-    console.log("hi woeld");
+    console.log("hi woelddd");
 });
