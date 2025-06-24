@@ -1,5 +1,5 @@
 const express = require("express");
-const adminauth = require("./middlewares/auth"); // ✅ Corrected path
+const adminauth = require("./middlewares/auth");
 const connectdB=require("./config/database");
 const User=require("./models/user");
 const app = express();
