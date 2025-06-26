@@ -1,19 +1,57 @@
 const express = require("express");
-const { connectDB } = require("./config/database");
+const connectDB  = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const { validateSignUpData, validateLoginData } = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-  const userObj = req.body;
-
-  const user = new User(userObj);
   try {
+    validateSignUpData(req);
+    const { username, firstName, lastName, email, password } = req.body;
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      username,
+      firstName,
+      lastName,
+      email,
+      password: passwordHash,
+    });
     await user.save();
     res.status(200).send("User Added successfully");
   } catch (err) {
-    res.status(500).send("error saving the user " + err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+app.post("/login", async (req, res) => {
+  try {
+    validateLoginData(req)
+    const { username, email, password } = req.body;
+    const userId = email || username;
+
+    
+    const user = await User.findOne({
+      $or: [{ email: userId }, { username: userId }],
+    });
+    
+    if (!user) {
+      return res
+        .status(400)
+        .json({ error: "Invalid Credential"});
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.password)
+
+    if(isPasswordValid){
+      res.status(200).send("login successful")
+    }else{
+      throw new Error("Invalid Credential");
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -85,8 +123,6 @@ app.delete("/user", async (req, res) => {
   }
 });
 
-
-
 app.patch("/user", async (req, res) => {
   try {
     const { email, username } = req.body;
@@ -107,12 +143,12 @@ app.patch("/user", async (req, res) => {
     ];
     const data = req.body;
 
-    const isUpdateAllowed = Object.keys(data).every(
-      (k) => ALLOWED_UPDATE.includes(k)
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATE.includes(k)
     );
 
-    if(!isUpdateAllowed){
-      throw new Error("Update not allow")
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allow");
     }
 
     if (!userId) {
