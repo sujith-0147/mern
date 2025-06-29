@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+// require("dotenv").config;
 
 // Define the User schema
 // Added new validations and SchemaTypes
@@ -57,8 +60,7 @@ const userSchema = new Schema(
         validator: function (value) {
           return validator.isStrongPassword(value);
         },
-        message:
-          "Password is not strong",
+        message: "Password is not strong",
       },
     },
     avatar: {
@@ -116,7 +118,21 @@ const userSchema = new Schema(
 );
 
 
+userSchema.methods.getJWT = function () {
+  // create a jwt
+  const token = jwt.sign({ _id: this._id },"Ramasujith1.", {
+    expiresIn: "3d",
+  });
 
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (password) {
+    const isPasswordValid = await bcrypt.compare(password, this.password);
+  return isPasswordValid
+};
+
+// Export the model
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
