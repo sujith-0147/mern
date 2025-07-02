@@ -3,10 +3,7 @@ const { Schema } = mongoose;
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-// require("dotenv").config;
 
-// Define the User schema
-// Added new validations and SchemaTypes
 
 const userSchema = new Schema(
   {
@@ -89,7 +86,7 @@ const userSchema = new Schema(
     },
     dateOfBirth: {
       type: Date,
-      // need to add minimum zero year old and max 150 years
+     
     },
     age: {
       type: Number,
